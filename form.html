@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Solicitud de Documentos</title>
+</head>
+<body>
+  <h1>Formato para subir documentos</h1>
+  <form id="docForm" action="/upload" method="post" enctype="multipart/form-data">
+    <label>Nombre:
+      <input type="text" name="name" required />
+    </label>
+    <br/>
+    <label>Email:
+      <input type="email" name="email" required />
+    </label>
+    <br/>
+    <label>Documento (PDF, JPG, PNG, DOC, DOCX) - max 8MB:
+      <input type="file" name="documento" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required />
+    </label>
+    <br/>
+    <button type="submit">Enviar documento</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    // Opcional: manejar la respuesta sin recargar (fetch)
+    const form = document.getElementById("docForm");
+    const resDiv = document.getElementById("result");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      resDiv.textContent = "Enviando...";
+      try {
+        const r = await fetch("/upload", { method: "POST", body: fd });
+        const json = await r.json();
+        if (json.ok) {
+          resDiv.innerHTML = `<p>Subida OK. Archivo accesible en: <a href="${json.metadata.url}" target="_blank">${json.metadata.url}</a></p>`;
+        } else {
+          resDiv.textContent = "Error: " + (json.error || "desconocido");
+        }
+      } catch (err) {
+        resDiv.textContent = "Error de red: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
